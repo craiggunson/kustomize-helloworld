@@ -247,96 +247,25 @@ to see how _staging_ and _production_ differ:
 
 
 ```
-diff --side-by-side --color   <(kubectl kustomize $OVERLAYS/staging)   <(kubectl kustomize $OVERLAYS/production) | colordiff
+colordiff --side-by-side   <(kubectl kustomize ./overlays/staging)   <(kubectl kustomize ./overlays/production) | more
 ```
 
 The first part of the difference output should look
 something like
-```
+```diff
 apiVersion: v1                                                  apiVersion: v1
 data:                                                           data:
-  altGreeting: Have a pineapple!                              |   altGreeting: Good Morning!
-  enableRisky: "true"                                         |   enableRisky: "false"
++  altGreeting: Have a pineapple!                              |   altGreeting: Good Morning!
++  enableRisky: "true"                                         |   enableRisky: "false"
 kind: ConfigMap                                                 kind: ConfigMap
 metadata:                                                       metadata:
   annotations:                                                    annotations:
-    note: Hello, I am staging!                                |     note: Hello, I am production!
++    note: Hello, I am staging!                                |     note: Hello, I am production!
   labels:                                                         labels:
     app: my-hello                                                   app: my-hello
     org: acmeCorporation                                            org: acmeCorporation
-    variant: staging                                          |     variant: production
-  name: staging-the-map                                       |   name: production-the-map
----                                                             ---
-apiVersion: v1                                                  apiVersion: v1
-kind: Service                                                   kind: Service
-metadata:                                                       metadata:
-  annotations:                                                    annotations:
-    note: Hello, I am staging!                                |     note: Hello, I am production!
-  labels:                                                         labels:
-    app: my-hello                                                   app: my-hello
-    org: acmeCorporation                                            org: acmeCorporation
-    variant: staging                                          |     variant: production
-  name: staging-the-service                                   |   name: production-the-service
-spec:                                                           spec:
-  ports:                                                          ports:
-  - port: 8666                                                    - port: 8666
-    protocol: TCP                                                   protocol: TCP
-    targetPort: 8080                                                targetPort: 8080
-  selector:                                                       selector:
-    app: my-hello                                                   app: my-hello
-    deployment: hello                                               deployment: hello
-    org: acmeCorporation                                            org: acmeCorporation
-    variant: staging                                          |     variant: production
-  type: LoadBalancer                                              type: LoadBalancer
----                                                             ---
-apiVersion: apps/v1                                             apiVersion: apps/v1
-kind: Deployment                                                kind: Deployment
-metadata:                                                       metadata:
-  annotations:                                                    annotations:
-    note: Hello, I am staging!                                |     note: Hello, I am production!
-  labels:                                                         labels:
-    app: my-hello                                                   app: my-hello
-    org: acmeCorporation                                            org: acmeCorporation
-    variant: staging                                          |     variant: production
-  name: staging-the-deployment                                |   name: production-the-deployment
-spec:                                                           spec:
-  replicas: 3                                                 |   replicas: 10
-  selector:                                                       selector:
-    matchLabels:                                                    matchLabels:
-      app: my-hello                                                   app: my-hello
-      deployment: hello                                               deployment: hello
-      org: acmeCorporation                                            org: acmeCorporation
-      variant: staging                                        |       variant: production
-  template:                                                       template:
-    metadata:                                                       metadata:
-      annotations:                                                    annotations:
-        note: Hello, I am staging!                            |         note: Hello, I am production!
-      labels:                                                         labels:
-        app: my-hello                                                   app: my-hello
-        deployment: hello                                               deployment: hello
-        org: acmeCorporation                                            org: acmeCorporation
-        variant: staging                                      |         variant: production
-    spec:                                                           spec:
-      containers:                                                     containers:
-      - command:                                                      - command:
-        - /hello                                                        - /hello
-        - --port=8080                                                   - --port=8080
-        - --enableRiskyFeature=$(ENABLE_RISKY)                          - --enableRiskyFeature=$(ENABLE_RISKY)
-        env:                                                            env:
-        - name: ALT_GREETING                                            - name: ALT_GREETING
-          valueFrom:                                                      valueFrom:
-            configMapKeyRef:                                                configMapKeyRef:
-              key: altGreeting                                                key: altGreeting
-              name: staging-the-map                           |               name: production-the-map
-        - name: ENABLE_RISKY                                            - name: ENABLE_RISKY
-          valueFrom:                                                      valueFrom:
-            configMapKeyRef:                                                configMapKeyRef:
-              key: enableRisky                                                key: enableRisky
-              name: staging-the-map                           |               name: production-the-map
-        image: monopole/hello:1                                         image: monopole/hello:1
-        name: the-container                                             name: the-container
-        ports:                                                          ports:
-        - containerPort: 8080                                           - containerPort: 8080
++    variant: staging                                          |     variant: production
++  name: staging-the-map                                       |   name: production-the-map
 ```
 ## Deploy
 
